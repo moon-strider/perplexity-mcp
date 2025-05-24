@@ -2,14 +2,11 @@ import asyncio
 import aiohttp
 import sys
 import logging
-import json
-from datetime import datetime
 import os
 
 from mcp.server.models import InitializationOptions
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
-from pydantic import AnyUrl
 import mcp.server.stdio
 from perplexity_mcp import __version__
 
@@ -18,14 +15,10 @@ server = Server("perplexity-mcp")
 
 @server.list_prompts()
 async def handle_list_prompts() -> list[types.Prompt]:
-    """
-    List available prompts.
-    Each prompt can have optional arguments to customize its behavior.
-    """
     return [
         types.Prompt(
             name="perplexity_search_web",
-            description="Search the web using Perplexity AI and filter results by recency",
+            description="Search the web using Perplexity AI and filter results by recency if required",
             arguments=[
                 types.PromptArgument(
                     name="query",
@@ -34,7 +27,7 @@ async def handle_list_prompts() -> list[types.Prompt]:
                 ),
                 types.PromptArgument(
                     name="recency",
-                    description="Filter results by how recent they are. Options: 'day' (last 24h), 'week' (last 7 days), 'month' (last 30 days), 'year' (last 365 days). Defaults to 'month'.",
+                    description="Filter results by how recent they are. Options: 'day' (last 24h), 'week' (last 7 days), 'month' (last 30 days), 'year' (last 365 days). Optional argument.",
                     required=False,
                 ),
             ],
@@ -46,24 +39,22 @@ async def handle_list_prompts() -> list[types.Prompt]:
 async def handle_get_prompt(
     name: str, arguments: dict[str, str] | None
 ) -> types.GetPromptResult:
-    """
-    Generate a prompt by combining arguments with server state.
-    """
     if name != "perplexity_search_web":
         raise ValueError(f"Unknown prompt: {name}")
 
     query = (arguments or {}).get("query", "")
-    recency = (arguments or {}).get("recency", "month")
-    return types.GetPromptResult(
-        description=f"Search the web for information about: {query}",
-        messages=[
-            types.PromptMessage(
-                role="user",
-                content=types.TextContent(
-                    type="text",
-                    text=f"Find recent information about: {query}",
-                ),
+    recency = (arguments or {}).get("recency", None)
+    msg_composed = [
+        types.PromptMessage(
+            role="user",
+            content=types.TextContent(
+                type="text",
+                text=f"Find recent information about: {query}",
             ),
+        ),
+    ]
+    if recency:
+        msg_composed.append(
             types.PromptMessage(
                 role="user",
                 content=types.TextContent(
@@ -71,7 +62,10 @@ async def handle_get_prompt(
                     text=f"Only include results from the last {recency}",
                 ),
             ),
-        ],
+        )
+    return types.GetPromptResult(
+        description=f"Search the web for information about: {query}",
+        messages=msg_composed,
     )
 
 
@@ -109,20 +103,19 @@ async def call_tool(
     raise ValueError(f"Tool not found: {name}")
 
 
-async def call_perplexity(query: str, recency: str) -> str:
+async def call_perplexity(query: str, recency: str | None = None) -> str:
 
     url = "https://api.perplexity.ai/chat/completions"
 
-    # Get the model from environment variable or use "sonar" as default
-    model = os.getenv("PERPLEXITY_MODEL", "sonar")
+    model = os.getenv("PERPLEXITY_MODEL", "sonar-pro")
 
     payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": "Be precise and concise."},
+            {"role": "system", "content": "Be precise in your responses, never make assumptions you cannot back up."},
             {"role": "user", "content": query},
         ],
-        "max_tokens": "512",
+        "max_tokens": "4096",
         "temperature": 0.2,
         "top_p": 0.9,
         "return_images": False,
@@ -133,7 +126,7 @@ async def call_perplexity(query: str, recency: str) -> str:
         "presence_penalty": 0,
         "frequency_penalty": 1,
         "return_citations": True,
-        "search_context_size": "low",
+        "search_context_size": "high",
     }
 
     headers = {
@@ -147,7 +140,6 @@ async def call_perplexity(query: str, recency: str) -> str:
             data = await response.json()
             content = data["choices"][0]["message"]["content"]
             
-            # Format response with citations if available
             if "citations" in data:
                 citations = data["citations"]
                 formatted_citations = "\n\nCitations:\n" + "\n".join(f"[{i+1}] {url}" for i, url in enumerate(citations))
@@ -177,7 +169,6 @@ async def main_async():
 
 
 def main():
-    """CLI entry point for perplexity-mcp"""
     logging.basicConfig(level=logging.INFO)
 
     API_KEY = os.getenv("PERPLEXITY_API_KEY")
@@ -188,11 +179,9 @@ def main():
         )
         sys.exit(1)
 
-    # Log which model is being used (helpful for debug)
     model = os.getenv("PERPLEXITY_MODEL", "sonar")
     logging.info(f"Using Perplexity AI model: {model}")
     
-    # List available models
     available_models = {
         "sonar-deep-research": "128k context - Enhanced research capabilities",
         "sonar-reasoning-pro": "128k context - Advanced reasoning with professional focus",

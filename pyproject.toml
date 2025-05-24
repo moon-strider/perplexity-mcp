@@ -3,10 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "perplexity-mcp"
+name = "perplexity-mcp-ultra"
 dynamic = ["version"]
 authors = [
-    { name = "Jason Allen" },
+    { name = "moon-strider" },
 ]
 description = "MCP integration for Perplexity AI web searches"
 readme = "README.md"
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-perplexity-mcp = "perplexity_mcp:main"
+perplexity-mcp-ultra = "perplexity_mcp:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/perplexity_mcp"]

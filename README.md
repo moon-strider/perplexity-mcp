@@ -1,16 +1,10 @@
 # perplexity-mcp MCP server
 
-[![smithery badge](https://smithery.ai/badge/perplexity-mcp)](https://smithery.ai/server/perplexity-mcp)
-
 A Model Context Protocol (MCP) server that provides web search functionality using [Perplexity AI's](https://www.perplexity.ai/) API. Works with the [Anthropic](https://www.anthropic.com/news/model-context-protocol) Claude desktop client.
 
 ## Example
 
 Let's you use prompts like, "Search the web to find out what's new at Anthropic in the past week."
-
-## Glama Scores
-
-<a href="https://glama.ai/mcp/servers/ebg0za4hn9"><img width="380" height="200" src="https://glama.ai/mcp/servers/ebg0za4hn9/badge" alt="Perplexity Server MCP server" /></a>
 
 ## Components
 
@@ -37,14 +31,6 @@ The server implements one tool:
   - Returns search results from Perplexity's API
 
 ## Installation
-
-### Installing via Smithery
-
-To install Perplexity MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/server/perplexity-mcp):
-
-```bash
-npx -y @smithery/cli install perplexity-mcp --client claude
-```
 
 ### Requires [UV](https://github.com/astral-sh/uv) (Fast Python package and project manager)
 
@@ -82,7 +68,6 @@ Optional environment variables:
   - `sonar-reasoning`: 128k context - Enhanced reasoning capabilities
   - `sonar-pro`: 200k context - Professional grade model
   - `sonar`: 128k context - Default model
-  - `r1-1776`: 128k context - Alternative architecture
 
 And updated list of models is avaiable (here)[https://docs.perplexity.ai/guides/model-cards]
 
