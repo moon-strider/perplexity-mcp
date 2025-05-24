@@ -75,15 +75,19 @@ And updated list of models is avaiable (here)[https://docs.perplexity.ai/guides/
 
 Add this tool as a mcp server by editing the Cursor/Claude config file.
 
+> There is sometimes a problem with uvx scope in Claude Desktop, so if logs show that uvx is not found, try running `which uvx` from the terminal that has access to uvx and then specity the full path to the executable in "command" of the mcp config.
+
 ```json
   "perplexity-mcp": {
     "env": {
       "PERPLEXITY_API_KEY": "XXXXXXXXXXXXXXXXXXXX",
       "PERPLEXITY_MODEL": "sonar"
     },
-    "command": "uvx",
+    "command": "uvx", # or full path like: /opt/homebrew/Caskroom/miniconda/base/bin/uvx
     "args": [
-      "perplexity-mcp"
+      "--from",
+      "git+https://github.com/moon-strider/perplexity-mcp",
+      "perplexity-mcp-ultra"
     ]
   }
 ```
