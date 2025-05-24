@@ -2,17 +2,19 @@
 
 A Model Context Protocol (MCP) server that provides web search functionality using [Perplexity AI's](https://www.perplexity.ai/) API. Works with the [Anthropic](https://www.anthropic.com/news/model-context-protocol) Claude desktop client.
 
-## Example
+## Examples
 
-Let's you use prompts like, "Search the web to find out what's new at Anthropic in the past week."
+Use prompts like:
+- "Search the web to find out what's new at Anthropic in the past week."
+- "Do deep research on the latest advances in quantum computing in the past month."
 
 ## Components
 
 ### Prompts
 
-The server provides a single prompt:
+The server provides two prompts:
 
-- perplexity_search_web: Search the web using Perplexity AI
+- **perplexity_search_web**: Quick web search using Perplexity AI
   - Required "query" argument for the search query
   - Optional "recency" argument to filter results by time period:
     - 'day': last 24 hours
@@ -21,14 +23,27 @@ The server provides a single prompt:
     - 'year': last 365 days
   - Uses Perplexity's API to perform web searches
 
+- **perplexity_deep_research**: Comprehensive deep research using Perplexity AI
+  - Required "query" argument for the research topic
+  - Optional "recency" argument to filter results by time period (same options as above)
+  - Uses Perplexity's sonar-deep-research model with 65,536 max tokens
+  - Provides exhaustive analysis with detailed insights backed by evidence
+
 ### Tools
 
-The server implements one tool:
+The server implements two tools:
 
-- perplexity_search_web: Search the web using Perplexity AI
+- **perplexity_search_web**: Quick web search using Perplexity AI
   - Takes "query" as a required string argument
   - Optional "recency" parameter to filter results (day/week/month/year)
-  - Returns search results from Perplexity's API
+  - Returns concise search results from Perplexity's API
+  - Best for quick lookups and current information
+
+- **perplexity_deep_research**: Comprehensive deep research using Perplexity AI
+  - Takes "query" as a required string argument
+  - Optional "recency" parameter to filter results (day/week/month/year)
+  - Returns extensive, detailed research with citations
+  - Best for in-depth analysis, comprehensive reports, and thorough investigations
 
 ## Installation
 

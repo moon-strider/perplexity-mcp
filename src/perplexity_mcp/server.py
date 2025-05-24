@@ -31,6 +31,22 @@ async def handle_list_prompts() -> list[types.Prompt]:
                     required=False,
                 ),
             ],
+        ),
+        types.Prompt(
+            name="perplexity_deep_research",
+            description="Perform deep research using Perplexity AI's sonar-deep-research model with extensive context (65536 tokens)",
+            arguments=[
+                types.PromptArgument(
+                    name="query",
+                    description="The research topic or question requiring in-depth analysis",
+                    required=True,
+                ),
+                types.PromptArgument(
+                    name="recency",
+                    description="Filter results by how recent they are. Options: 'day' (last 24h), 'week' (last 7 days), 'month' (last 30 days), 'year' (last 365 days). Optional argument.",
+                    required=False,
+                ),
+            ],
         )
     ]
 
@@ -39,34 +55,59 @@ async def handle_list_prompts() -> list[types.Prompt]:
 async def handle_get_prompt(
     name: str, arguments: dict[str, str] | None
 ) -> types.GetPromptResult:
-    if name != "perplexity_search_web":
-        raise ValueError(f"Unknown prompt: {name}")
-
     query = (arguments or {}).get("query", "")
     recency = (arguments or {}).get("recency", None)
-    msg_composed = [
-        types.PromptMessage(
-            role="user",
-            content=types.TextContent(
-                type="text",
-                text=f"Find recent information about: {query}",
-            ),
-        ),
-    ]
-    if recency:
-        msg_composed.append(
+    
+    if name == "perplexity_search_web":
+        msg_composed = [
             types.PromptMessage(
                 role="user",
                 content=types.TextContent(
                     type="text",
-                    text=f"Only include results from the last {recency}",
+                    text=f"Find recent information about: {query}",
                 ),
             ),
+        ]
+        if recency:
+            msg_composed.append(
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text",
+                        text=f"Only include results from the last {recency}",
+                    ),
+                ),
+            )
+        return types.GetPromptResult(
+            description=f"Search the web for information about: {query}",
+            messages=msg_composed,
         )
-    return types.GetPromptResult(
-        description=f"Search the web for information about: {query}",
-        messages=msg_composed,
-    )
+    elif name == "perplexity_deep_research":
+        msg_composed = [
+            types.PromptMessage(
+                role="user",
+                content=types.TextContent(
+                    type="text",
+                    text=f"Conduct comprehensive deep research on: {query}",
+                ),
+            ),
+        ]
+        if recency:
+            msg_composed.append(
+                types.PromptMessage(
+                    role="user",
+                    content=types.TextContent(
+                        type="text",
+                        text=f"Only include results from the last {recency}",
+                    ),
+                ),
+            )
+        return types.GetPromptResult(
+            description=f"Deep research on: {query}",
+            messages=msg_composed,
+        )
+    else:
+        raise ValueError(f"Unknown prompt: {name}")
 
 
 @server.list_tools()
@@ -75,6 +116,22 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="perplexity_search_web",
             description="Search the web using Perplexity AI with recency filtering",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "recency": {
+                        "type": "string",
+                        "enum": ["day", "week", "month", "year"],
+                        "default": "month",
+                    },
+                },
+                "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="perplexity_deep_research",
+            description="Perform comprehensive deep research using Perplexity AI's sonar-deep-research model (65536 max tokens)",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -100,6 +157,11 @@ async def call_tool(
         recency = arguments.get("recency", "month")
         result = await call_perplexity(query, recency)
         return [types.TextContent(type="text", text=str(result))]
+    elif name == "perplexity_deep_research":
+        query = arguments["query"]
+        recency = arguments.get("recency", None)
+        result = await call_perplexity_deep_research(query, recency)
+        return [types.TextContent(type="text", text=str(result))]
     raise ValueError(f"Tool not found: {name}")
 
 
@@ -115,9 +177,52 @@ async def call_perplexity(query: str, recency: str | None = None) -> str:
             {"role": "system", "content": "Be precise in your responses, never make assumptions you cannot back up."},
             {"role": "user", "content": query},
         ],
-        "max_tokens": "4096",
+        "max_tokens": "8192",
         "temperature": 0.2,
         "top_p": 0.9,
+        "return_images": False,
+        "return_related_questions": False,
+        "search_recency_filter": recency,
+        "top_k": 0,
+        "stream": False,
+        "presence_penalty": 0,
+        "frequency_penalty": 1,
+        "return_citations": True,
+        "search_context_size": "high",
+    }
+
+    headers = {
+        "Authorization": f"Bearer {os.getenv('PERPLEXITY_API_KEY')}",
+        "Content-Type": "application/json",
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=payload, headers=headers) as response:
+            response.raise_for_status()
+            data = await response.json()
+            content = data["choices"][0]["message"]["content"]
+            
+            if "citations" in data:
+                citations = data["citations"]
+                formatted_citations = "\n\nCitations:\n" + "\n".join(f"[{i+1}] {url}" for i, url in enumerate(citations))
+                return content + formatted_citations
+            
+            return content
+
+
+async def call_perplexity_deep_research(query: str, recency: str | None = None) -> str:
+
+    url = "https://api.perplexity.ai/chat/completions"
+
+    payload = {
+        "model": "sonar-deep-research",
+        "messages": [
+            {"role": "system", "content": "Conduct thorough and comprehensive research. Be exhaustive in your analysis and provide detailed insights backed by evidence."},
+            {"role": "user", "content": query},
+        ],
+        "max_tokens": "65536",
+        "temperature": 0.1,
+        "top_p": 0.85,
         "return_images": False,
         "return_related_questions": False,
         "search_recency_filter": recency,
@@ -188,7 +293,6 @@ def main():
         "sonar-reasoning": "128k context - Enhanced reasoning capabilities",
         "sonar-pro": "200k context - Professional grade model",
         "sonar": "128k context - Default model",
-        "r1-1776": "128k context - Alternative architecture"
     }
     
     logging.info("Available Perplexity models (set with PERPLEXITY_MODEL environment variable):")
