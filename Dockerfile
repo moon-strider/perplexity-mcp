@@ -1,15 +1,10 @@
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS uv
-
+FROM ghcr.io/astral-sh/uv:0.12.11 AS uv
+FROM python:3.12-slim
+COPY --from=uv /uv /usr/local/bin/uv
 WORKDIR /app
-
-ENV UV_COMPILE_BYTECODE=1
-
-COPY pyproject.toml /app/pyproject.toml
-
-RUN --mount=type=cache,target=/root/.cache/uv     uv pip install -r /app/pyproject.toml --no-dev --no-editable
-
-ADD src /app/src
-
-ENV PERPLEXITY_API_KEY=""
-
-ENTRYPOINT ["uv", "run", "perplexity-mcp"]
+COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY src ./src
+RUN uv sync --frozen --no-dev --no-editable --python /usr/local/bin/python \
+    && useradd --uid 10001 --create-home app
+USER 10001:10001
+ENTRYPOINT ["/app/.venv/bin/perplexity-mcp-ultra"]

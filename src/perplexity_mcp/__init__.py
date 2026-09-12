@@ -1,13 +1,10 @@
-"""Perplexity MCP package."""
+"""Perplexity search and research over MCP."""
 
-__version__ = "1.0.0"
-
-from . import server
-import asyncio
+__version__ = "1.1.0"
 
 
-def main():
-    """Main entry point for the package."""
-    asyncio.run(server.main_async())
+def main() -> None:
+    """Console entry point; import runtime only when invoked."""
+    from .server import main as run
 
-__all__ = ["main", "server"]
+    run()

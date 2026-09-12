@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.28.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -10,11 +10,25 @@ authors = [
 ]
 description = "MCP integration for Perplexity AI web searches"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
-    "aiohttp>=3.8.0",
-    "pydantic>=2.0.0",
-    "mcp>=1.0.2",
+    "aiohttp>=3.12,<4",
+    "pydantic>=2.11,<3",
+    "mcp==2.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/moon-strider/perplexity-mcp"
+Issues = "https://github.com/moon-strider/perplexity-mcp/issues"
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "pytest-asyncio==1.3.0",
+    "pytest-cov==7.0.0",
+    "ruff==0.15.1",
+    "twine==6.2.0",
 ]
 
 [project.scripts]
@@ -28,3 +42,22 @@ allow-direct-references = true
 
 [tool.hatch.version]
 path = "src/perplexity_mcp/__init__.py"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+filterwarnings = ["error::ResourceWarning"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.coverage.run]
+source = ["perplexity_mcp"]
+branch = true
+patch = ["subprocess"]
+parallel = true

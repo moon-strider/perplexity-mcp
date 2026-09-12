@@ -1,0 +1,59 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.11'
+          python-version: ${{ matrix.python }}
+      - run: uv sync --frozen --group dev
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen pytest --cov=perplexity_mcp --cov-branch --cov-report=term-missing --cov-report=xml --junitxml=reports/pytest.xml
+      - run: uv build
+      - run: uv run --frozen twine check dist/*
+      - name: Test isolated wheel installation
+        run: |
+          uv venv /tmp/perplexity-wheel
+          uv pip install --python /tmp/perplexity-wheel/bin/python dist/*.whl
+          PERPLEXITY_TEST_PYTHON=/tmp/perplexity-wheel/bin/python uv run --frozen pytest tests/test_stdio.py
+      - name: Independent MCP Probe
+        if: matrix.python == '3.12'
+        run: |
+          uv pip install 'mcp-probe[full] @ git+https://github.com/moon-strider/mcp-probe.git@21d435e8ab68b216a98a14a5f147730912edef7c'
+          .venv/bin/python scripts/probe_offline.py --output-dir reports/probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.python }}
+          path: |
+            reports/
+            coverage.xml
+            dist/
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t perplexity-mcp:test .
+      - run: docker run --rm perplexity-mcp:test --version
+      - name: Missing key fails cleanly
+        shell: bash
+        run: |
+          set +e
+          docker run --rm -i perplexity-mcp:test </dev/null >stdout.txt 2>stderr.txt
+          status=$?
+          set -e
+          test "$status" -eq 2
+          test ! -s stdout.txt
+          grep -q PERPLEXITY_API_KEY stderr.txt

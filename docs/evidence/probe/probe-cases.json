@@ -1,0 +1,11 @@
+{
+  "perplexity_search_web": {
+    "query": "Offline search contract check",
+    "recency": "week",
+    "max_tokens": 64
+  },
+  "perplexity_deep_research": {
+    "query": "Offline research contract check",
+    "max_tokens": 64
+  }
+}
