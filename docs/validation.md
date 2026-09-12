@@ -16,10 +16,15 @@ Executed on 2026-09-12 without a Perplexity API key. All provider responses in t
 | Wheel and sdist; Twine metadata checks | Pass |
 | Dependency audit of installed environment | No known vulnerabilities reported by pip-audit at this date |
 | MCP Probe | 44 checks: 27 pass, 12 explicit skips, 5 informational; no failures or warnings |
+| GitHub Actions: Python 3.11, 3.12 and 3.13 | All test, build and isolated-wheel jobs passed |
+| GitHub Actions: MCP Probe on Python 3.12 | Passed |
+| GitHub Actions: Docker | Image build, `--version` and missing-key startup checks passed |
 
 The installed-wheel gate launches the server from a temporary working directory using a separate virtual environment. It does not use an editable install or the source tree for server imports.
 
-CI additionally covers Python 3.13 and Docker image build/start. Docker is not installed in the local execution environment; its result must be read from the actual GitHub Actions run, not inferred from the unit tests. Package registry publication and live API verification were not performed. The dependency audit checked 68 published distributions; the local project itself was skipped because version 1.1.0 was not on PyPI. Its source is covered by the review and tests above.
+The remote checks completed successfully in [GitHub Actions run 34702407725](https://github.com/moon-strider/perplexity-mcp/actions/runs/34702407725) for [commit `b4b47ae8a1037e132ecf576024bef1036b9cec81`](https://github.com/moon-strider/perplexity-mcp/commit/b4b47ae8a1037e132ecf576024bef1036b9cec81), submitted in [PR #1](https://github.com/moon-strider/perplexity-mcp/pull/1). Docker is not installed in the local execution environment; the Docker results above were verified in that remote CI run. The 97% coverage figure is the local measurement described in the table, not a separate claim about remote CI coverage.
+
+Package registry publication and live API verification were not performed. The dependency audit checked 68 published distributions; the local project itself was skipped because version 1.1.0 was not on PyPI. Its source is covered by the review and tests above.
 
 ## Independent protocol evidence
 
