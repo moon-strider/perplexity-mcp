@@ -1,0 +1,132 @@
+{
+  "mcp_probe_version": "0.2.0",
+  "report_schema_version": "1",
+  "incomplete": false,
+  "mode": "discovery",
+  "spec_version": "2025-11-25",
+  "target": "stdio: python",
+  "transport": "stdio",
+  "timestamp": "2026-09-12T15:18:45.029612Z",
+  "duration_ms": 565.8024219992512,
+  "server_info": {
+    "name": "perplexity-mcp",
+    "version": "1.1.0"
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": true,
+    "tasks": false
+  },
+  "summary": {
+    "total": 10,
+    "passed": 6,
+    "failed": 0,
+    "warnings": 0,
+    "skipped": 4,
+    "info": 0
+  },
+  "suites": [
+    {
+      "name": "lifecycle",
+      "checks": [
+        {
+          "id": "INIT-001",
+          "description": "Protocol handshake or discovery succeeds",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 562.3993380031607,
+          "details": "Handshake complete",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-002",
+          "description": "Requested protocol version is supported",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.012838998372899368,
+          "details": "2025-11-25",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-003",
+          "description": "Capabilities and server identity are well formed",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.012628999684238806,
+          "details": "Validated capability objects and server identity",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-004",
+          "description": "Server responds after handshake or discovery",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.9254569995391648,
+          "details": "Server responded successfully",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-005",
+          "description": "Observe requests before legacy initialization",
+          "status": "SKIP",
+          "severity": "INFO",
+          "duration_ms": 0.015853998775128275,
+          "details": "Legacy isolated probe; requires --active",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-006",
+          "description": "Observe repeated legacy initialization",
+          "status": "SKIP",
+          "severity": "INFO",
+          "duration_ms": 0.009294002666138113,
+          "details": "Legacy isolated probe; requires --active",
+          "error_kind": null
+        }
+      ]
+    },
+    {
+      "name": "prompts",
+      "checks": [
+        {
+          "id": "PROMPT-001",
+          "description": "prompts/list returns a list of prompts",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.8204879995901138,
+          "details": "Found 2 prompts",
+          "error_kind": null
+        },
+        {
+          "id": "PROMPT-002",
+          "description": "Prompt names and optional descriptions are valid",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 0.02357500125071965,
+          "details": "All 2 prompts have required fields",
+          "error_kind": null
+        },
+        {
+          "id": "PROMPT-003",
+          "description": "prompts/get returns messages",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.008933002391131595,
+          "details": "Content retrieval requires --active",
+          "error_kind": null
+        },
+        {
+          "id": "PROMPT-004",
+          "description": "prompts/list pagination works",
+          "status": "SKIP",
+          "severity": "WARNING",
+          "duration_ms": 0.006629998097196221,
+          "details": "Server returned all prompts in a single page",
+          "error_kind": null
+        }
+      ]
+    }
+  ],
+  "exit_code": 0
+}

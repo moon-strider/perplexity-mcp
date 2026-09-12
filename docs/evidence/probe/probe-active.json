@@ -1,0 +1,363 @@
+{
+  "mcp_probe_version": "0.2.0",
+  "report_schema_version": "1",
+  "incomplete": false,
+  "mode": "active",
+  "spec_version": "2025-11-25",
+  "target": "stdio: python",
+  "transport": "stdio",
+  "timestamp": "2026-09-12T15:18:40.813004Z",
+  "duration_ms": 3871.845300000132,
+  "server_info": {
+    "name": "perplexity-mcp",
+    "version": "1.1.0"
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": true,
+    "tasks": false
+  },
+  "summary": {
+    "total": 34,
+    "passed": 21,
+    "failed": 0,
+    "warnings": 0,
+    "skipped": 8,
+    "info": 5
+  },
+  "suites": [
+    {
+      "name": "lifecycle",
+      "checks": [
+        {
+          "id": "INIT-001",
+          "description": "Protocol handshake or discovery succeeds",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 584.1721010001493,
+          "details": "Handshake complete",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-002",
+          "description": "Requested protocol version is supported",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.010455001756781712,
+          "details": "2025-11-25",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-003",
+          "description": "Capabilities and server identity are well formed",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.009884999599307775,
+          "details": "Validated capability objects and server identity",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-004",
+          "description": "Server responds after handshake or discovery",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 1.2713489995803684,
+          "details": "Server responded successfully",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-005",
+          "description": "Observe requests before legacy initialization",
+          "status": "INFO",
+          "severity": "INFO",
+          "duration_ms": 739.9049069972534,
+          "details": "Request before initialize was rejected; this is an observation",
+          "error_kind": null
+        },
+        {
+          "id": "INIT-006",
+          "description": "Observe repeated legacy initialization",
+          "status": "INFO",
+          "severity": "INFO",
+          "duration_ms": 985.7756950004841,
+          "details": "Repeated initialize was accepted; this is an observation",
+          "error_kind": null
+        }
+      ]
+    },
+    {
+      "name": "jsonrpc",
+      "checks": [
+        {
+          "id": "RPC-001",
+          "description": "Response has a valid JSON-RPC envelope",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 3.1532370012428146,
+          "details": "Validated envelope, result and JSON-RPC version",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-002",
+          "description": "Response id matches request id",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.8303430004161783,
+          "details": "Request and response ids match, including their types",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-003",
+          "description": "Unknown method produces a structured error",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 2.2396999993361533,
+          "details": "Error envelope is well formed",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-004",
+          "description": "Isolated server survives malformed stdio input",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 886.6727059976256,
+          "details": "Fresh server recovered after malformed input",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-005",
+          "description": "Unknown method returns method-not-found",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 1.4603130002797116,
+          "details": "Correct method-not-found error",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-006",
+          "description": "Legacy server tolerates unknown notification",
+          "status": "INFO",
+          "severity": "INFO",
+          "duration_ms": 1.0416219993203413,
+          "details": "Server remains responsive; unsolicited response handling is limited",
+          "error_kind": null
+        },
+        {
+          "id": "RPC-007",
+          "description": "Observed protocol error codes",
+          "status": "INFO",
+          "severity": "INFO",
+          "duration_ms": 0.015633999282727018,
+          "details": "-32601: Method not found",
+          "error_kind": null
+        }
+      ]
+    },
+    {
+      "name": "tools",
+      "checks": [
+        {
+          "id": "TOOL-001",
+          "description": "tools/list returns a bounded list",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 2.365008000197122,
+          "details": "Found 2 tools",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-002",
+          "description": "Tool metadata has valid required fields",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.012117998267058283,
+          "details": "Validated 2 tool definitions",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-003",
+          "description": "Tool input and output schemas are valid",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 233.11197399743833,
+          "details": "Schemas validated offline",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-004",
+          "description": "Selected tool calls return valid content",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 216.78863299894147,
+          "details": "Validated 2 selected tool result(s)",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-005",
+          "description": "Selected tools reject schema-invalid arguments",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 205.8193939992634,
+          "details": "Validated argument rejection for 2 tool(s)",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-006",
+          "description": "Nonexistent tool returns an error",
+          "status": "PASS",
+          "severity": "WARNING",
+          "duration_ms": 0.7233110009110533,
+          "details": "Server rejected unknown tool",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-007",
+          "description": "Tool names follow the naming recommendation",
+          "status": "PASS",
+          "severity": "WARNING",
+          "duration_ms": 0.014482000551652163,
+          "details": "Tool names follow the naming recommendation",
+          "error_kind": null
+        },
+        {
+          "id": "TOOL-008",
+          "description": "tools/list pagination terminates",
+          "status": "SKIP",
+          "severity": "WARNING",
+          "duration_ms": 0.012608998076757416,
+          "details": "Only one page was returned",
+          "error_kind": null
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "checks": [
+        {
+          "id": "NOTIF-001",
+          "description": "Server remains operational during notification checks",
+          "status": "PASS",
+          "severity": "CRITICAL",
+          "duration_ms": 0.5944369986536913,
+          "details": "Server is operational",
+          "error_kind": null
+        },
+        {
+          "id": "NOTIF-002",
+          "description": "notifications/tools/list_changed format",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.01247799809789285,
+          "details": "No tools/list_changed notifications received",
+          "error_kind": null
+        },
+        {
+          "id": "NOTIF-003",
+          "description": "notifications/resources/list_changed format",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.005719000910175964,
+          "details": "No resources/list_changed notifications received",
+          "error_kind": null
+        },
+        {
+          "id": "NOTIF-004",
+          "description": "notifications/prompts/list_changed format",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.004446999810170382,
+          "details": "No prompts/list_changed notifications received",
+          "error_kind": null
+        },
+        {
+          "id": "NOTIF-005",
+          "description": "notifications/progress format and monotonicity",
+          "status": "SKIP",
+          "severity": "WARNING",
+          "duration_ms": 0.00563899811822921,
+          "details": "No progress notifications received",
+          "error_kind": null
+        },
+        {
+          "id": "SUB-001",
+          "description": "resources/subscribe returns success",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.006359998224070296,
+          "details": "Server does not advertise resources.subscribe capability",
+          "error_kind": null
+        },
+        {
+          "id": "SUB-002",
+          "description": "resources/unsubscribe returns success",
+          "status": "SKIP",
+          "severity": "ERROR",
+          "duration_ms": 0.008953000360634178,
+          "details": "No active subscription (SUB-001 did not run or failed)",
+          "error_kind": null
+        },
+        {
+          "id": "SUB-003",
+          "description": "Resource update triggers notification",
+          "status": "SKIP",
+          "severity": "WARNING",
+          "duration_ms": 0.0037960016925353557,
+          "details": "No automatic way to trigger resource update (requires server-specific tool)",
+          "error_kind": null
+        }
+      ]
+    },
+    {
+      "name": "edge_cases",
+      "checks": [
+        {
+          "id": "EDGE-001",
+          "description": "Request accepts empty application parameters",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 0.522869002452353,
+          "details": "Empty application parameters accepted",
+          "error_kind": null
+        },
+        {
+          "id": "EDGE-002",
+          "description": "Legacy request accepts omitted params",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 0.464340002508834,
+          "details": "Omitted params accepted",
+          "error_kind": null
+        },
+        {
+          "id": "EDGE-003",
+          "description": "Observe handling of a large metadata payload",
+          "status": "PASS",
+          "severity": "INFO",
+          "duration_ms": 1.4933029997337144,
+          "details": "Server answered a large request without invoking tools",
+          "error_kind": null
+        },
+        {
+          "id": "EDGE-004",
+          "description": "Response arrives within the check deadline",
+          "status": "PASS",
+          "severity": "ERROR",
+          "duration_ms": 0.47904299935908057,
+          "details": "Response arrived within the enforced deadline",
+          "error_kind": null
+        },
+        {
+          "id": "EDGE-005",
+          "description": "Transport shutdown is managed by the runner",
+          "status": "INFO",
+          "severity": "INFO",
+          "duration_ms": 0.007800997991580516,
+          "details": "Process and HTTP session cleanup run after reporting; no server is killed mid-suite",
+          "error_kind": null
+        }
+      ]
+    }
+  ],
+  "exit_code": 0
+}

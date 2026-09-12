@@ -1,0 +1,40 @@
+{
+  "validation_mode": "offline-synthetic-provider",
+  "live_provider_verified": false,
+  "limitations": [
+    "The loopback substitute verifies HTTP/MCP integration, not real API acceptance, search quality, or billing.",
+    "Active Probe prompt retrieval supplies recency='test'; this invalid enum is intentionally rejected. Probe prompt coverage is discovery-only; valid and invalid retrieval are tested by the official SDK suite.",
+    "Resources are not advertised, so their suite is not requested. Notifications that were not emitted remain explicit Probe skips."
+  ],
+  "runs": [
+    {
+      "name": "probe-active",
+      "exit_code": 0,
+      "summary": {
+        "total": 34,
+        "passed": 21,
+        "failed": 0,
+        "warnings": 0,
+        "skipped": 8,
+        "info": 5
+      }
+    },
+    {
+      "name": "probe-prompts-discovery",
+      "exit_code": 0,
+      "summary": {
+        "total": 10,
+        "passed": 6,
+        "failed": 0,
+        "warnings": 0,
+        "skipped": 4,
+        "info": 0
+      }
+    }
+  ],
+  "loopback_requests": 2,
+  "models_exercised": [
+    "sonar",
+    "sonar-deep-research"
+  ]
+}

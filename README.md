@@ -1,123 +1,130 @@
-# perplexity-mcp MCP server
+# Perplexity MCP
 
-A Model Context Protocol (MCP) server that provides web search functionality using [Perplexity AI's](https://www.perplexity.ai/) API. Works with the [Anthropic](https://www.anthropic.com/news/model-context-protocol) Claude desktop client.
+A small Python MCP server for cited web answers and longer research requests through Perplexity's Sonar API. Works over **stdio** with two tools, validated arguments, bounded requests, and structured results containing sources and usage.
 
-## Examples
+[![CI](https://github.com/moon-strider/perplexity-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/moon-strider/perplexity-mcp/actions/workflows/ci.yml)
 
-Use prompts like:
-- "Search the web to find out what's new at Anthropic in the past week."
-- "Do deep research on the latest advances in quantum computing in the past month."
+## Install and connect
 
-## Components
+Requires Python 3.11+ and a Perplexity API key. The package and executable are named **`perplexity-mcp-ultra`**.
 
-### Prompts
-
-The server provides two prompts:
-
-- **perplexity_search_web**: Quick web search using Perplexity AI
-  - Required "query" argument for the search query
-  - Optional "recency" argument to filter results by time period:
-    - 'day': last 24 hours
-    - 'week': last 7 days
-    - 'month': last 30 days (default)
-    - 'year': last 365 days
-  - Uses Perplexity's API to perform web searches
-
-- **perplexity_deep_research**: Comprehensive deep research using Perplexity AI
-  - Required "query" argument for the research topic
-  - Optional "recency" argument to filter results by time period (same options as above)
-  - Uses Perplexity's sonar-deep-research model with 65,536 max tokens
-  - Provides exhaustive analysis with detailed insights backed by evidence
-
-### Tools
-
-The server implements two tools:
-
-- **perplexity_search_web**: Quick web search using Perplexity AI
-  - Takes "query" as a required string argument
-  - Optional "recency" parameter to filter results (day/week/month/year)
-  - Returns concise search results from Perplexity's API
-  - Best for quick lookups and current information
-
-- **perplexity_deep_research**: Comprehensive deep research using Perplexity AI
-  - Takes "query" as a required string argument
-  - Optional "recency" parameter to filter results (day/week/month/year)
-  - Returns extensive, detailed research with citations
-  - Best for in-depth analysis, comprehensive reports, and thorough investigations
-
-## Installation
-
-### Requires [UV](https://github.com/astral-sh/uv) (Fast Python package and project manager)
-
-If uv isn't installed.
-
-```bash
-# Using Homebrew on macOS
-brew install uv
+```sh
+uv tool install 'git+https://github.com/moon-strider/perplexity-mcp.git'
+export PERPLEXITY_API_KEY='your-key'
+perplexity-mcp-ultra
 ```
 
-or
+The process speaks MCP on stdin/stdout; starting it directly waits for an MCP client. Diagnostics go to stderr. `--help` and `--version` work without a key.
 
-```bash
-# On macOS and Linux.
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# On Windows.
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-### Environment Variables
-
-The following environment variable is required in your claude_desktop_config.json. You can obtain an API key from [Perplexity](https://perplexity.ai)
-
-- `PERPLEXITY_API_KEY`: Your Perplexity AI API key
-
-Optional environment variables:
-
-- `PERPLEXITY_MODEL`: The Perplexity model to use (defaults to "sonar" if not specified)
-
-  Available models:
-
-  - `sonar-deep-research`: 128k context - Enhanced research capabilities
-  - `sonar-reasoning-pro`: 128k context - Advanced reasoning with professional focus
-  - `sonar-reasoning`: 128k context - Enhanced reasoning capabilities
-  - `sonar-pro`: 200k context - Professional grade model
-  - `sonar`: 128k context - Default model
-
-And updated list of models is avaiable (here)[https://docs.perplexity.ai/guides/model-cards]
-
-### Cursor & Claude Desktop Installation
-
-Add this tool as a mcp server by editing the Cursor/Claude config file.
-
-> There is sometimes a problem with uvx scope in Claude Desktop, so if logs show that uvx is not found, try running `which uvx` from the terminal that has access to uvx and then specity the full path to the executable in "command" of the mcp config.
+A complete configuration for clients using `mcpServers`:
 
 ```json
-  "perplexity-mcp": {
-    "env": {
-      "PERPLEXITY_API_KEY": "XXXXXXXXXXXXXXXXXXXX",
-      "PERPLEXITY_MODEL": "sonar"
-    },
-    "command": "uvx", # or full path like: /opt/homebrew/Caskroom/miniconda/base/bin/uvx
-    "args": [
-      "--from",
-      "git+https://github.com/moon-strider/perplexity-mcp",
-      "perplexity-mcp-ultra"
-    ]
+{
+  "mcpServers": {
+    "perplexity": {
+      "command": "perplexity-mcp-ultra",
+      "env": {
+        "PERPLEXITY_API_KEY": "your-key"
+      }
+    }
   }
+}
 ```
 
-#### Cursor
-- On MacOS: `/Users/your-username/.cursor/mcp.json`
-- On Windows: `C:\Users\your-username\.cursor\mcp.json`
+Desktop clients may need the executable's absolute path; `command -v perplexity-mcp-ultra` shows it on Unix. Use the client's secret/environment settings when available.
 
-If everything is working correctly, you should now be able to call the tool from Cursor.
-<img width="800" alt="mcp_screenshot" src="https://github.com/user-attachments/assets/4b59774f-646c-41b3-9886-5cfd4c4ca051" width=600>
+## Tools
 
-#### Claude Desktop
-- On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
-- On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+| Tool | Default model | Use |
+|---|---|---|
+| `perplexity_search_web` | `sonar` | A cited answer to a web search question |
+| `perplexity_deep_research` | `sonar-deep-research` | A longer research request; allow several minutes |
 
-To verify the server is working. Open the Claude client and use a prompt like "search the web for news about openai in the past week". You should see an alert box open to confirm tool usage. Click "Allow for this chat".
+Both accept:
 
-  <img width="600" alt="mcp_screenshot" src="https://github.com/user-attachments/assets/922d8f6a-8c9a-4978-8be6-788e70b4d049" />
+- `query`: nonblank string, at most 32,000 characters.
+- `recency`: `hour`, `day`, `week`, `month`, `year`, or `null`. Omit it for **no time restriction**.
+- `max_tokens`: integer from 1 to 65,536, or `null` to use the configured default. This limits answer generation, not the model's context window. Provider/model limits still apply.
+
+Unknown arguments and invalid types are rejected before any HTTP call. These examples show MCP tool calls, not shell commands:
+
+```json
+{"name":"perplexity_search_web","arguments":{"query":"What changed in Python packaging this week?","recency":"week","max_tokens":2048}}
+```
+
+```json
+{"name":"perplexity_deep_research","arguments":{"query":"Compare strategies for evaluating long-running software agents, with primary sources.","max_tokens":8192}}
+```
+
+The same names are available as MCP prompts accepting `query` and optional `recency`. Getting a prompt only creates an instruction; it makes no paid API call.
+
+## Results
+
+Each successful call returns readable text and `structuredContent` with:
+
+- `answer`, `citations`, and `search_results` (including available source metadata);
+- `model`, provider `usage`, and `finish_reason`;
+- `truncated`, `latency_seconds`, and `attempts`.
+
+Citation order and duplicates are preserved so `[1]`, `[2]`, etc. still refer to the provider's answer. Search results do not create invented citation numbers. A token-limited answer is marked incomplete. Missing optional usage/source fields are represented by empty containers; reported usage/cost is whatever the provider supplied, not an estimate.
+
+Tool failures have `isError: true` and `structuredContent.error` with `code`, `message`, `retryable`, and an HTTP `status` when available. Provider response bodies, credentials, and user queries are not copied into diagnostic errors.
+
+## Configuration
+
+| Environment variable | Default | Meaning |
+|---|---|---|
+| `PERPLEXITY_API_KEY` | Required | Perplexity credential |
+| `PERPLEXITY_API_URL` | `https://api.perplexity.ai/v1/sonar` | Full completion endpoint |
+| `PERPLEXITY_MODEL` | `sonar` | Search model |
+| `PERPLEXITY_RESEARCH_MODEL` | `sonar-deep-research` | Research model |
+| `PERPLEXITY_SEARCH_MAX_TOKENS` | `8192` | Default answer token limit |
+| `PERPLEXITY_RESEARCH_MAX_TOKENS` | `8192` | Default research answer token limit |
+| `PERPLEXITY_SEARCH_TIMEOUT` | `60` | Total seconds, including retries |
+| `PERPLEXITY_RESEARCH_TIMEOUT` | `600` | Total seconds, including retries |
+| `PERPLEXITY_MAX_RETRIES` | `2` | Extra attempts, allowed range 0–5 |
+
+HTTPS is required for custom endpoints, except loopback HTTP used by local tests. The administrator controls this endpoint; credentials are sent to it. Redirects are not followed. The response body is bounded at 8 MiB and compressed responses are rejected to bound decoded memory use.
+
+Only HTTP 429, 502, 503, and 504 can be retried, within the original request deadline. `Retry-After` is respected; if it cannot fit the remaining deadline, no early retry is made. Timeouts and disconnected requests are **not** automatically replayed, because the provider may already have processed/billed them. Transient HTTP retries may also incur provider charges; set retries to `0` for a single attempt. This server does not promise a dollar-denominated budget or exactly-once billing.
+
+Configure the MCP client's own timeout to exceed the research timeout. Cancelling a call stops local waiting; this synchronous API cannot guarantee cancellation of already-running provider work.
+
+Perplexity also maintains an [official MCP server](https://docs.perplexity.ai/docs/getting-started/integrations/mcp-server). This project is a focused Python implementation of the two Sonar tools. The [Sonar API reference](https://docs.perplexity.ai/api-reference/sonar-post) currently groups this API under Legacy API; no shutdown claim is made here. Other Perplexity API families are outside this package.
+
+## Docker
+
+```sh
+docker build -t perplexity-mcp .
+docker run --rm -i -e PERPLEXITY_API_KEY perplexity-mcp
+```
+
+Use `-i` without a TTY. The image runs the installed executable as an unprivileged user. No API key is embedded in the image.
+
+## Development and offline verification
+
+```sh
+uv sync --frozen --group dev
+uv run --frozen ruff check .
+uv run --frozen ruff format --check .
+uv run --frozen pytest --cov=perplexity_mcp --cov-branch --cov-report=term-missing
+uv build
+uv run --frozen twine check dist/*
+```
+
+The suite starts real loopback HTTP servers and real MCP stdio processes. It checks success, malformed/oversized responses, validation, retries, deadlines, cancellation, concurrent calls, source preservation, credential redaction, and lifecycle cleanup without a Perplexity key. Tests never call the public Perplexity endpoint.
+
+To independently check the protocol with [mcp-probe](https://github.com/moon-strider/mcp-probe):
+
+```sh
+uv pip install 'mcp-probe[full] @ git+https://github.com/moon-strider/mcp-probe.git@21d435e8ab68b216a98a14a5f147730912edef7c'
+.venv/bin/python scripts/probe_offline.py --output-dir reports/probe
+```
+
+The script uses an explicitly synthetic loopback provider and exports JSON/JUnit reports. Its active suites cover tool calls and protocol behavior; prompt discovery is checked separately because Probe's generic prompt generator does not know recency's allowed values. Valid and invalid prompt calls are exercised by the SDK tests.
+
+See [validation evidence](docs/validation.md) for executed checks and limitations. **No live Perplexity request has been verified for this revision.** Offline success does not establish model availability, account entitlements, real billing, citation truth, or current production acceptance of the payload. With a key, the remaining smoke is one search and one bounded research call through an MCP client, recording model, sources, usage and latency.
+
+## License
+
+MIT.
